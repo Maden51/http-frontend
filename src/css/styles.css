@@ -1,0 +1,85 @@
+.modal {
+    visibility: hidden;
+    position: absolute;
+}
+
+.active {
+    visibility: visible;
+}
+
+.addButton {
+    display: block;
+    margin-left: auto;
+    margin-right: 0;
+    margin-bottom: 15px;
+}
+
+.btn {
+    background-color: white;
+    padding: 10px;
+    border: 1px solid grey;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.container {
+    position: relative;
+    padding: 30px;
+}
+
+.controlBox {
+    display: flex;
+}
+
+.tickets-container {
+    border: 1px solid grey;
+    padding: 10px;
+    font-size: 18px;
+}
+
+.ticketEl {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+}
+
+.ticketEl:nth-child(n+2) {
+    border-top: 1px solid grey;
+}
+
+.ticketDate {
+    margin-right: 10px;
+}
+
+.ticketEdit {
+    background-image: url('../img/icon-search.png');
+    margin-right: 10px;
+}
+
+.ticketDelete {
+    background-image: url('../img/icon-cancel.png');
+}
+
+.ticketDelete, .ticketEdit {
+    background-size: contain;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+}
+
+.ticket__status-true {
+    background-image: url('../img/icon-accept.png');
+    width: 23px;
+    height: 23px;
+}
+
+.ticket__status-false {
+    background-image: url('../img/icon-circle-outline.png');
+    width: 20px;
+    height: 20px;
+}
+
+.ticket__status-false, .ticket__status-true {
+    background-size: contain;
+    cursor: pointer;
+}
