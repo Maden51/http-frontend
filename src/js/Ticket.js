@@ -1,7 +1,7 @@
-import getAllTickets, { formPOST, getTicketByID, POSTTicketId } from './request';
-import modalClose from './util';
+import getAllTickets, { formPOST, ticketIdPOST, ticketByIdGET } from './request';
+import modalClose, { getTime } from './util';
 
-export default class Ticket {
+export default class TicketFull {
   constructor(ticket) {
     this.id = ticket.id;
     this.name = ticket.name;
@@ -12,133 +12,132 @@ export default class Ticket {
     this.element = null;
   }
 
-  addTicket() {
-    const ticketContainer = document.querySelector('.tickets-container');
-    const ticketEl = document.createElement('div');
-    ticketEl.className = 'ticketEl';
-    ticketEl.dataset.idTicket = this.id;
+  addTicketToDOM() {
+    const box = document.querySelector('.tickets-container');
+    const ticketDiv = document.createElement('div');
+    ticketDiv.classList.add('ticketDiv');
+    ticketDiv.dataset.idTicket = this.id;
 
     const ticketStatus = document.createElement('div');
-    ticketStatus.className = 'ticketStatus';
+    ticketStatus.classList.add('ticketStatus');
     if (this.status === false) {
-      ticketStatus.classList.add('ticket__status-false');
+      ticketStatus.classList.add('falseStatus');
     } else {
-      ticketStatus.classList.add('ticket__status-true');
+      ticketStatus.classList.add('trueStatus');
     }
 
     const ticketName = document.createElement('div');
-    ticketName.className = 'ticketName';
+    ticketName.classList.add('ticketName');
     ticketName.textContent = this.name;
 
-    const controlBox = document.createElement('div');
-    controlBox.className = 'controlBox';
+    const btnBox = document.createElement('div');
+    btnBox.classList.add('btnBox');
     const ticketDate = document.createElement('div');
-    ticketDate.className = 'ticketDate';
-    ticketDate.textContent = this.created;
+    ticketDate.classList.add('ticketDate');
+    ticketDate.textContent = getTime(this.created);
     const ticketEdit = document.createElement('div');
-    ticketEdit.className = 'ticketEdit';
-    const ticketDelete = document.createElement('div');
-    ticketDelete.className = 'ticketDelete';
-    controlBox.appendChild(ticketDate);
-    controlBox.appendChild(ticketEdit);
-    controlBox.appendChild(ticketDelete);
+    ticketEdit.classList.add('ticketEdit');
+    const ticketDel = document.createElement('div');
+    ticketDel.classList.add('ticketDel');
+    btnBox.append(ticketDate);
+    btnBox.append(ticketEdit);
+    btnBox.append(ticketDel);
 
-    ticketEl.appendChild(ticketStatus);
-    ticketEl.appendChild(ticketName);
-    ticketEl.appendChild(controlBox);
-
-    ticketContainer.appendChild(ticketEl);
+    ticketDiv.append(ticketStatus);
+    ticketDiv.append(ticketName);
+    ticketDiv.append(btnBox);
+    box.append(ticketDiv);
 
     ticketStatus.addEventListener('click', this.changeStatus);
-    ticketName.addEventListener('click', this.ShowFullDescription);
-    ticketEdit.addEventListener('click', this.editTicket);
-    ticketDelete.addEventListener('click', this.deleteTicket);
+    ticketName.addEventListener('click', this.checkForDetails);
+    ticketEdit.addEventListener('click', this.editModal);
+    ticketDel.addEventListener('click', this.deleteTicket);
   }
 
   changeStatus(event) {
     this.element = event.currentTarget;
-    this.element.classList.toggle('ticket__status-false');
-    this.element.classList.toggle('ticket__status-true');
-    const ticketId = this.element.closest('.ticketEl').dataset.idTicket;
-    const options = { ticketId };
+    this.element.classList.toggle('falseStatus');
+    this.element.classList.toggle('trueStatus');
+    const id = this.element.closest('.ticketDiv').dataset.idTicket;
+    const options = { id };
     function callback() {
-      Ticket.redrawTickets();
+      TicketFull.redraw();
     }
-    POSTTicketId(options, 'changeTicketStatus', callback);
+    ticketIdPOST(options, 'changeStatus', callback);
   }
 
-  ShowFullDescription(event) {
+  checkForDetails(event) {
     this.element = event.currentTarget;
-    const ticketEl = this.element.closest('.ticketEl');
-    const fullDescription = ticketEl.querySelector('.fullDescription');
-    if (fullDescription) {
-      fullDescription.remove();
+    const ticketDiv = this.element.closest('.ticketDiv');
+    const details = ticketDiv.querySelector('.details');
+    if (details) {
+      details.remove();
     } else {
       const callback = (data) => {
-        const descriptionEl = document.createElement('div');
-        descriptionEl.className = 'fullDescription';
-        descriptionEl.textContent = data.description;
-        ticketEl.append(descriptionEl);
+        const detailsDiv = document.createElement('div');
+        detailsDiv.classList.add('details');
+        detailsDiv.textContent = data.description;
+        ticketDiv.append(detailsDiv);
       };
-      getTicketByID(event, callback);
+      ticketByIdGET(event, callback);
     }
   }
 
-  editTicket(event) {
+  editModal(event) {
     this.element = event.currentTarget;
     const modal = document.querySelector('.editTicket');
     modal.classList.add('active');
-    const shortDescription = modal.querySelector('.editTicket__shortDescription');
-    const fullDescription = modal.querySelector('.editTicket__fullDescription');
+    const description = modal.querySelector('.description');
+    const fullDescription = modal.querySelector('.fullDescription');
 
     function callback(data) {
-      shortDescription.value = data.name;
+      description.value = data.name;
       fullDescription.value = data.description;
     }
-    getTicketByID(event, callback);
+    ticketByIdGET(event, callback);
 
-    const cancelButton = modal.querySelector('.cancel');
-    cancelButton.addEventListener('click', modalClose);
-    const form = modal.querySelector('.modal__content-editTicketForm');
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
+    const cancel = modal.querySelector('.cancel');
+    cancel.addEventListener('click', modalClose);
+    const form = modal.querySelector('.editForm');
+    form.addEventListener('submit', (evt) => {
+      evt.preventDefault();
       const options = {
-        name: shortDescription.value,
+        name: description.value,
         description: fullDescription.value,
       };
-      function callbackClose() {
+      function callback2() {
         modalClose();
-        Ticket.redrawTickets();
+        TicketFull.redraw();
       }
-      formPOST(options, 'editTicket', callbackClose);
+      formPOST(options, 'updateTicket', callback2);
     });
   }
 
   deleteTicket(event) {
     this.element = event.currentTarget;
-    const ticketId = this.element.closest('.ticketEl').dataset.idTicket;
+    const id = this.element.closest('.ticketDiv').dataset.idTicket;
     const modal = document.querySelector('.deleteTicket');
     modal.classList.add('active');
-    const cancelButton = document.querySelector('.cancel');
-    cancelButton.addEventListener('click', modalClose);
-    const confirmButton = document.querySelector('.confirm');
-    confirmButton.addEventListener('click', () => {
-      const options = { ticketId };
+    const cancel = modal.querySelector('.cancel');
+    cancel.addEventListener('click', modalClose);
+    const ok = modal.querySelector('.ok');
+    ok.addEventListener('click', () => {
+      const options = { id };
       function callback() {
         modalClose();
-        Ticket.redrawTickets();
+        TicketFull.redraw();
       }
-      POSTTicketId(options, 'deleteTicketById', callback);
+      ticketIdPOST(options, 'deleteTicket', callback);
     });
   }
 
-  static redrawTickets() {
+  static redraw() {
     const callback = (data) => {
-      const ticketsContainer = document.querySelector('.tickets-container');
-      ticketsContainer.innerHTML = '';
-      data.forEach((elem) => {
-        const ticket = new Ticket(elem);
-        ticket.addTicket();
+      const box = document.querySelector('.tickets-container');
+      box.innerHTML = '';
+      data.forEach((item) => {
+        const ticket = new TicketFull(item);
+        ticket.addTicketToDOM();
       });
     };
     getAllTickets(callback);

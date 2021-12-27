@@ -1,7 +1,7 @@
-/* eslint-disable no-console */
 export default function getAllTickets(callback) {
   const xhr = new XMLHttpRequest();
   xhr.open('GET', 'https://http-backend111.herokuapp.com/?method=allTickets');
+
   xhr.addEventListener('load', () => {
     if (xhr.status >= 200 && xhr.status < 300) {
       try {
@@ -9,17 +9,18 @@ export default function getAllTickets(callback) {
         console.log(data);
         callback(data);
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
     }
   });
+
   xhr.send();
 }
 
-export function getTicketByID(event, callback) {
+export function ticketByIdGET(event, callback) {
+  const ticketDiv = event.currentTarget.closest('.ticketDiv');
+  const ticketId = ticketDiv.dataset.idTicket;
   const xhr = new XMLHttpRequest();
-  const ticketEl = event.currentTarget.closest('.ticketEl');
-  const ticketId = ticketEl.dataset.idTicket;
   xhr.open('GET', `https://http-backend111.herokuapp.com/?method=ticketById&id=${ticketId}`);
   xhr.addEventListener('load', () => {
     if (xhr.status >= 200 && xhr.status < 300) {
@@ -53,7 +54,7 @@ export function formPOST(options, method, callback) {
   xhr.send(request);
 }
 
-export function POSTTicketId(options, method, callback) {
+export function ticketIdPOST(options, method, callback) {
   const xhr = new XMLHttpRequest();
   xhr.open('POST', 'https://http-backend111.herokuapp.com/');
   const request = JSON.stringify({ method, object: options });

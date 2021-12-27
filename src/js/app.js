@@ -1,28 +1,30 @@
 import { formPOST } from './request';
-import Ticket from './Ticket';
+import TicketFull from './Ticket';
 import modalClose from './util';
 
-Ticket.redrawTickets();
+TicketFull.redraw();
 
-const addButton = document.querySelector('.addButton');
-addButton.addEventListener('click', (e) => {
-  e.preventDefault();
+const addButton = document.querySelector('.addTicketButton');
+addButton.addEventListener('click', (event) => {
+  event.preventDefault();
   const addModal = document.querySelector('.addTicket');
   addModal.classList.add('active');
-  const addForm = document.querySelector('.modal__content-addTicketForm');
-  const shortDescription = document.querySelector('.addTicket__shortDescription');
-  const fullDescription = document.querySelector('.addTicket__fullDescription');
-  const cancelButton = document.querySelector('.cancel');
-  cancelButton.addEventListener('click', modalClose);
-  addForm.addEventListener('submit', (evt) => {
+
+  const modalForm = document.querySelector('.addTicketForm');
+  const description = modalForm.querySelector('.description');
+  const fullDescription = modalForm.querySelector('.fullDescription');
+  const cancelBtn = modalForm.querySelector('.cancel');
+  cancelBtn.addEventListener('click', modalClose);
+
+  modalForm.addEventListener('submit', (evt) => {
     evt.preventDefault();
     const options = {
-      name: shortDescription.value,
+      name: description.value,
       description: fullDescription.value,
     };
     function callback() {
       modalClose();
-      Ticket.redrawTickets();
+      TicketFull.redraw();
     }
     formPOST(options, 'createTicket', callback);
   });
